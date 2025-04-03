@@ -1,0 +1,14 @@
+import './index.css';
+import Footer from "./Footer.jsx";
+import Header from "./Header.jsx";
+import Title from "./title.jsx";
+function App() {
+  return (
+    <> 
+    <Header />
+    <Footer/>
+    <Title/>
+   </>
+  );
+}
+export default App;
