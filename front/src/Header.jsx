@@ -2,7 +2,7 @@
 function Header() {
   return (
     <header>
-      <h1>scrycto</h1>
+      <h2 onClick={() =>   alert("Button Clicked!")}>scrycto</h2>
       <nav>
 
         <ul>
