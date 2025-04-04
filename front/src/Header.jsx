@@ -10,7 +10,7 @@ function Header() {
           <li><a href="#faq">FAQ</a></li>
           </ul>
        </nav>   
-       <hr/>
+       
  </header>
   );
 }

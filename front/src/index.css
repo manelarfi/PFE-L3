@@ -5,6 +5,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap');
 :root {
+  margin-left: 102px;
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -47,7 +48,9 @@ body {
 h2 {
   font-size: 3.2em;
   line-height: 1.1;
-  font-family: 'Anybody';
+  font-family: 'Kanit', sans-serif;
+  font-weight: 700;  /* Medium */
+  padding-bottom: 10px ;
 }
 
 button {
@@ -64,15 +67,10 @@ button {
   transition: background-color 0.5s;
   font-weight: 300; /* Light */
 
-  
- 
-
 }
 
 
 button:hover {
-  
-
   background-color:  #f2f2f3;
   color: #123414;
   border: 1px solid transparent;
@@ -90,4 +88,22 @@ button:hover {
     top: 30px;   /* Moves the element 20px down */
     left: 750px; 
   }
- 
+.logo {
+  width: 135px;
+  height: 27px;
+  position:absolute;
+  top: 30px;   /* Moves the element 20px down */
+  
+}
+.subtitle{
+  font-family: Kanit, sans-serif;
+  padding-bottom: 10px ;
+  font-weight: 200;
+  
+}
+.bg1{
+  width: 135px;
+  height: 27px;
+  position:absolute;
+  top: 30px;  
+}
