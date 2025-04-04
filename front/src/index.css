@@ -54,26 +54,27 @@ h2 {
 }
 
 button {
-  color: #f2f2f3;
+  color: #053411;
+  font-weight: 500;
   border-radius: 49.433px;;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
   font-size: 1em;
-  font-weight: 600;
-  font-family: inherit;
-  background-color: rgba(46, 242, 39, 0.12);
   
+  font-family: inherit;
+  background-color: #43ff64d9 ;
   cursor: pointer;
   transition: background-color 0.5s;
-  font-weight: 300; /* Light */
+  
 
 }
 
 
 button:hover {
-  background-color:  #f2f2f3;
-  color: #123414;
-  border: 1px solid transparent;
+  font-weight: 500;
+  background-color:  #f2f2f3 !important;
+  color: #123414 !important;
+  border: 1px solid transparent !important;
   }
 
   li {
@@ -86,7 +87,7 @@ button:hover {
     display: inline-block;
     position:absolute;
     top: 30px;   /* Moves the element 20px down */
-    left: 750px; 
+    left: 700px; 
   }
 .logo {
   width: 135px;
@@ -101,9 +102,31 @@ button:hover {
   font-weight: 200;
   
 }
+
 .bg1{
-  width: 135px;
-  height: 27px;
+  width: 700px;
+  height: 700px;
   position:absolute;
-  top: 30px;  
+  top: -150px; 
+  left: -100px; 
+  z-index: -1;
+}
+
+
+
+.bg2{
+  width: 700px;
+  height: 700px;
+  position:absolute;
+  top: 100px; 
+  left: 1000px; 
+  z-index: -1;
+}
+.spline-container {
+  position: absolute;
+  top: 30px;
+  left: 250px;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
 }

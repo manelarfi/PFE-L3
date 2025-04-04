@@ -1,7 +1,23 @@
 
-function bg() {
+function Bg() {
+  return(
 
-  <img src="/gradient.png" alt="bg" />
-  
+
+    <>
+      <div className="bg1">
+  <img src="/gradient.png" alt="bg1" />
+  </div>
+
+  <div className="bg2">
+  <img src="/gradient.png" alt="bg2" />
+  </div>
+ 
+</>
+
+
+
+  );
+
 }
-export default bg;
+
+export default Bg ;
