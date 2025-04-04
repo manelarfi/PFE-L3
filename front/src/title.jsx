@@ -2,12 +2,11 @@
 function Title() {
   return (
     <div className="Title">
-      <h1>Secure your 
-      messages.</h1>
-      <h2>let scrycto help you with that </h2>
-      <p>We provide a secure and private way to send messages. </p> 
+      <h2>Secure your messages.</h2>
+     
+      <h3>We provide a secure and private way to send messages. </h3> 
       
-    <button onClick={() => alert("Button Clicked!")}>Let's get </button>
+    <button onClick={() => alert("Button Clicked!")}>Let's get started </button>
 
       
     </div>
