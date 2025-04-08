@@ -11,6 +11,10 @@ function Bg() {
   <div className="bg2">
   <img src="/gradient.png" alt="bg2" />
   </div>
+
+  <div className="bg3">
+  <img src="/gradient.png" alt="bg3" />
+  </div>
  
 </>
 

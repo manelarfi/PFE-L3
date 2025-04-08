@@ -12,7 +12,7 @@
 
   color-scheme: light dark;
   color:  #f2f2f3;
-  background-color: #10120F;
+  background-color: #0a1205;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -38,14 +38,17 @@ a:hover {
 }
 
 body {
-  margin: 0;
+  
   display: flex;
   place-items: center;
-  min-width: 320px;
+  /*min-width: 320px;*/
   min-height: 100vh;
+  
+  overflow-x: hidden;
+  
 }
 
-h2 {
+ h2 {
   font-size: 3.2em;
   line-height: 1.1;
   font-family: 'Kanit', sans-serif;
@@ -65,12 +68,9 @@ button {
   background-color: #43ff64d9 ;
   cursor: pointer;
   transition: background-color 0.5s;
-  
-
 }
 
-
-button:hover {
+  button:hover {
   font-weight: 500;
   background-color:  #f2f2f3 !important;
   color: #123414 !important;
@@ -89,7 +89,7 @@ button:hover {
     top: 30px;   /* Moves the element 20px down */
     left: 700px; 
   }
-.logo {
+  .logo {
   width: 135px;
   height: 27px;
   position:absolute;
@@ -100,8 +100,9 @@ button:hover {
   font-family: Kanit, sans-serif;
   padding-bottom: 10px ;
   font-weight: 200;
-  
+  margin-top: 10px; 
 }
+
 
 .bg1{
   width: 700px;
@@ -112,14 +113,21 @@ button:hover {
   z-index: -1;
 }
 
-
-
 .bg2{
   width: 700px;
   height: 700px;
   position:absolute;
   top: 100px; 
   left: 1000px; 
+  z-index: -1;
+}
+
+.bg3{
+  width: 700px;
+  height: 700px;
+  position:absolute;
+  top: 500px; 
+  left: -100px;  
   z-index: -1;
 }
 .spline-container {
@@ -129,4 +137,13 @@ button:hover {
   width: 100%;
   height: 100%;
   z-index: -1;
+}
+.Title{
+
+  font-size: 0.9em;
+
+  font-family: 'Kanit', sans-serif;
+  font-weight: 700;  /* Medium */
+ padding-bottom: 7px ;
+  margin-top: 170px;
 }
