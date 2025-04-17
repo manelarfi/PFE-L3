@@ -17,7 +17,7 @@ function App() {
     <Title/>
     <Header />
     <Bg />
-    
+    {/*<Footer/>*/}
    </>
   );
 }
