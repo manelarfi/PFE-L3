@@ -56,7 +56,7 @@ body {
   padding-bottom: 10px ;
 }
 
-button {
+.landin {
   color: #053411;
   font-weight: 500;
   border-radius: 49.433px;;
@@ -70,7 +70,7 @@ button {
   transition: background-color 0.5s;
 }
 
-  button:hover {
+ .landin:hover {
   font-weight: 500;
   background-color:  #f2f2f3 !important;
   color: #123414 !important;
@@ -89,18 +89,21 @@ button {
     top: 30px;   /* Moves the element 20px down */
     left: 700px; 
   }
+
+  
   .logo {
   width: 135px;
   height: 27px;
   position:absolute;
   top: 30px;   /* Moves the element 20px down */
-  
 }
+
 .subtitle{
   font-family: Kanit, sans-serif;
   padding-bottom: 10px ;
   font-weight: 200;
-  margin-top: 10px; 
+  margin-top: 0px; 
+  
 }
 
 
@@ -130,6 +133,7 @@ button {
   left: -100px;  
   z-index: -1;
 }
+
 .spline-container {
   position: absolute;
   top: 30px;
@@ -138,6 +142,8 @@ button {
   height: 100%;
   z-index: -1;
 }
+
+
 .Title{
 
   font-size: 0.9em;
@@ -145,5 +151,78 @@ button {
   font-family: 'Kanit', sans-serif;
   font-weight: 700;  /* Medium */
  padding-bottom: 7px ;
-  margin-top: 170px;
+  margin-top: 70px;
+}
+
+
+.image-up {
+
+  position: absolute;
+  top: 630px;
+  left: 400px;
+
+  border: dashed 3px #f2f2f3;
+  border-width: 2px 2px 2px 2px;
+  background-color: #04420f41;
+  border-radius: 20px;
+padding-top: 10px;
+  padding-left: 200px;
+
+  cursor: pointer;
+  font-size: 40px;
+  display: flex;
+  width: 439.281px;
+  height: 85.291px;
+
+border-radius: 8.337px;
+border: 1.283px dashed #7AC577;
+
+background: rgba(255, 255, 255, 0.04);
+box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.25);
+
+}
+
+.titreimg{
+  font-size: 20px;
+  font-family: 'Kanit', sans-serif;
+  font-weight: 500;  /* Medium */
+ padding-bottom: 7px ;
+
+
+  position: absolute;
+  top: 580px;
+  left: 530px;
+  z-index: 10; /* Set z-index to a higher value */
+
+}
+.container{
+ 
+  background: rgba(23, 53, 27, 0.04);
+
+  z-index: -1;
+
+  position: absolute;
+  top: 570px;
+  left: 240px;
+  width: 750px;
+  height: 553.385px;
+
+  border-color: #f2f2f33b;
+  border-width: 2px; /* Add border width /
+  border-style: solid; / Add border style */
+  border-radius: 10px;
+  z-index: -1;
+
+}
+
+.image-up-text{
+  font-size: 20px;
+  font-family: 'Kanit', sans-serif;
+  font-weight: 500;  /* Medium */
+ padding-bottom: 7px ;
+padding-top: -10px;
+  position: absolute;
+  top: 630px;
+  left: 530px;
+  z-index: 10; /* Set z-index to a higher value */
 }
