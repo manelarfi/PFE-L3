@@ -23,6 +23,7 @@ const ImageUploader = () => {
         ref={fileInputRef}
         style={{ display: 'none' }} // Hide the input
       />
+      
     </>
   );
 };

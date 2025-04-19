@@ -1,11 +1,14 @@
-
+import React from "react";
+import ImageUploader from "./ImageUploader.jsx";
 
 function Container() {
   return (
-    <Container className="container">
-
-    </Container >);}
-
-
+    <div className="container">
+      <h2 className="container-title">Add Your Image</h2>
+      <h2 className="container-text-title">Add Your Text</h2>
+     
+    </div>
+  );
+}
 
 export default Container;
