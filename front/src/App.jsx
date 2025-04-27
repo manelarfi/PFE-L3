@@ -7,6 +7,7 @@ import Title from "./title.jsx";
 import Bg from './bg.jsx';
 import Splinescene from './spline.jsx';
 import ImageUploader from './ImageUploader.jsx';
+import ImageUploader1 from './ImageUploader1.jsx';
 import Container from './Container.jsx';
 import TextBox from './Textcontainer.jsx';
 function App() {
@@ -14,6 +15,7 @@ function App() {
     <>
    
      <ImageUploader />
+     <ImageUploader1 />
      <TextBox />
    <Splinescene/>
     <Container/>
