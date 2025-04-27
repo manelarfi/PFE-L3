@@ -12,7 +12,7 @@ import TextBox from './Textcontainer.jsx';
 function App() {
   return (
     <>
-     <h1>Upload an Image</h1>
+   
      <ImageUploader />
      <TextBox />
    <Splinescene/>
