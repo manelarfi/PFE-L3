@@ -8,10 +8,14 @@ function Container() {
       <h2 className="container-title">Add Your Image</h2>
       <h2 className="container-text-title">Add Your Text</h2>
      
+
     </div>
      <div className="container1">
- 
+     <h2 className="container-title">Add Your Image</h2>
     
+<button className='submit-button1'>
+        Submit
+      </button>
    </div></>
   );
 }
