@@ -13,7 +13,7 @@ function Container() {
      <div className="container1">
      <h2 className="container-title">Add Your Image</h2>
     
-<button className='submit-button1'>
+           <button onClick={alert} className='submit-button1'>
         Submit
       </button>
    </div></>

@@ -304,8 +304,6 @@ box-shadow: 1px 1px 1px rgba(9, 37, 17, 0.4);
   top: 950px;
   left: 380px;
 }
-
-
 .submit-button{
 
   position: absolute;
@@ -331,5 +329,29 @@ box-shadow: 1px 1px 1px rgba(9, 37, 17, 0.4);
   color: #123414 !important;
   border: 1px solid transparent !important;
   }
+.submit-button1{
 
+  position: absolute;
+  top: 230px;
+  left: 300px;
+
+  color: #053411;
+  font-weight: 500;
+  border-radius: 49.433px;;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  
+  font-family: inherit;
+  background-color: #43ff64d9 ;
+  cursor: pointer;
+  transition: background-color 0.5s;
+}
+
+.submit-button1:hover {
+  font-weight: 500;
+  background-color:  #f2f2f3 !important;
+  color: #123414 !important;
+  border: 1px solid transparent !important;
+  }
 
