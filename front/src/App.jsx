@@ -13,11 +13,11 @@ function App() {
     <>
      <Header />
     
-     
+     <Title/>
      <Splinescene/>
      <HideContainer/>
      <ShowContainer/>
-     <Title/>
+     
      <Bg />
     {/*<Footer/>*/}
    </>
