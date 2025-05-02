@@ -1,22 +1,43 @@
 
+        // pages/Home.jsx
+        import { useNavigate } from 'react-router-dom';
 function Header() {
+
+const navigate = useNavigate();
+  const handleContact = () => {
+    navigate('/Contact'); // changes the URL and shows About page
+      
+    };
+
+  const navigate1 = useNavigate();
+  const handleFAQ = () => {
+    navigate('/FAQ'); // changes the URL and shows About page
+  };
+
+  const navigate2 = useNavigate();
+  const handleHome = () => {
+    navigate('/'); // changes the URL and shows About page
+  };
+
   return (
     <header>
+
       <nav>
-        <ul >
-          <li><a href="#home">Home</a></li>
-        
-          <li><a href="#contact">Contact</a></li>
-          <li><a href="#faq">FAQ</a></li>
-          </ul>
-       </nav>   
+         <ul>
+
+           <li> <button onClick={handleHome}>Home</button></li>
+           <li> <button onClick={handleContact}>Contact</button></li>
+           <li> <button onClick={handleFAQ}>FAQ</button></li>
+          
+         </ul>
+      </nav>   
 
        
        <div className="logo">
-      <a href="#home">
-        <img src="/scrycto.svg" alt="Logo" />
-      </a>
      
+        <img src="/scrycto.svg" alt="Logo" />
+      
+
     </div>
        
  </header>

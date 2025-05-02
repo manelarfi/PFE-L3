@@ -20,17 +20,20 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
+li {
   font-weight: 500;
   color: #f2f2f3;
   text-decoration: inherit;
  
   transition: color 0.25s;
+  display: inline-block; /* or use inline */
+  margin-right: 0px; 
+  margin-left: 60px;
  
  
 
 }
-a:hover {
+li:hover {
   color: rgba(37, 178, 30, 0.842);
  
   transition: color 0.25s;
@@ -58,7 +61,7 @@ body {
 
 .landin {
   color: #053411;
-  font-weight: 500;
+  font-weight: 550 !important;
   border-radius: 49.433px !important;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
@@ -77,17 +80,12 @@ body {
   border: 1px solid transparent !important;
   }
 
-  li {
-    display: inline-block; /* or use inline */
-    margin-right: 0px; 
-    margin-left: 60px;
-   
-  }
+ 
   ul {
     display: inline-block;
     position:absolute;
-    top: 30px;   /* Moves the element 20px down */
-    left: 700px; 
+    top: 40px;   /* Moves the element 20px down */
+    left: 750px; 
   }
 
   
@@ -95,14 +93,16 @@ body {
   width: 135px;
   height: 27px;
   position:absolute;
-  top: 30px;   /* Moves the element 20px down */
+  top: 40px;   /* Moves the element 20px down */
 }
 
 .subtitle{
   font-family: Kanit, sans-serif;
   padding-bottom: 10px ;
   font-weight: 200;
-  margin-top: 0px; 
+  margin-top: 10px; 
+  margin-bottom: 10px;
+  font-size: larger;
   
 }
 
@@ -155,7 +155,7 @@ body {
 .spline-container {
   position: absolute;
   top: 30px;
-  left: 250px;
+  left: 300px;
   width: 100%;
   height: 100%;
   z-index: -1;
