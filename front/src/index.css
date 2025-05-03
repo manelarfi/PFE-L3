@@ -304,6 +304,9 @@ box-shadow: 1px 1px 1px rgba(9, 37, 17, 0.4);
   position: absolute;
   top: 950px;
   left: 380px;
+ 
+    resize: none; /* Disable resizing */
+  
 }
 .submit-button{
 
