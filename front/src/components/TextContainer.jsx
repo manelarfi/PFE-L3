@@ -10,6 +10,7 @@ const TextInputContainer = () => {
   const handleSubmit = () => {
     alert(`You typed: ${userText}`);
     // You can also send userText to a backend or use it anywhere
+    
   };
 
   return (

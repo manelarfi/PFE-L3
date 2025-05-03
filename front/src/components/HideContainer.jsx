@@ -3,6 +3,8 @@ import ImageUploader from "./ImageUploader.jsx";
 import TextBox from "./TextContainer.jsx";
 
 function HideContainer() {
+
+  
   return (
     <>
      <ImageUploader />

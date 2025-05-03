@@ -16,8 +16,8 @@ export default function CustomCursor() {
   useEffect(() => {
     const follow = () => {
       setPosition((prev) => ({
-        x: prev.x + (targetPosition.x - prev.x) * 0.1, // Reduce the factor for smoother/slower movement
-        y: prev.y + (targetPosition.y - prev.y) * 0.1,
+        x: prev.x + (targetPosition.x - prev.x) * 0.2, // Reduce the factor for smoother/slower movement
+        y: prev.y + (targetPosition.y - prev.y) * 0.2,
       }));
       requestAnimationFrame(follow); // Continuously update the animation
     };
