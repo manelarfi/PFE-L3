@@ -14,7 +14,8 @@ function Contact() {
   return (
     <>
     
-    
+    <Header/>
+    <Bg/>
     </>);
   }
   export default Contact;

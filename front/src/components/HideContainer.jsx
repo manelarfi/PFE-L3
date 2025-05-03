@@ -12,12 +12,6 @@ function HideContainer() {
       <div className="container">
       <h2 className="container-title">Add Your Image</h2>
       <h2 className="container-text-title">Add Your Text</h2>
-
-   
-
-    
-
-
    </div></>
   );
 }
