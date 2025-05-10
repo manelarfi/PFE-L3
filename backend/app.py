@@ -1,11 +1,11 @@
+# app.py
 from flask import Flask
-from src.routes import steganography_routes
+from src.steganography_routes import steganography_bp
 
-# Initialize the Flask app
 app = Flask(__name__)
 
-# Register blueprints for route handling
-app.register_blueprint(steganography_routes, url_prefix='/steganography')
+# Register Blueprint
+app.register_blueprint(steganography_bp)
 
 if __name__ == '__main__':
     app.run(debug=True)
