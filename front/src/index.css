@@ -269,7 +269,7 @@ box-shadow: 1px 1px 1px rgba(9, 37, 17, 0.4);
 .container-title {
 
   padding-top: 40px;
-  padding-left: 260px;
+  padding-left: 230px;
   font-size: 24px;
   font-family: 'Kanit', sans-serif;
   font-weight: 100;
@@ -439,4 +439,14 @@ box-shadow: 1px 1px 1px rgba(9, 37, 17, 0.4);
   max-width: 600px;
 
 
+}
+.chooser{
+  position: absolute;
+  top: 500px;
+  left: 300px;
+  font-size: 24px;
+  font-family: 'Kanit', sans-serif;
+  font-weight: 100;
+  margin-bottom: 20px;
+  color: #e6f4e9;
 }

@@ -9,10 +9,11 @@ import CustomCursor from './components/CustomCursor';
 function App() {
   return (
     <>
+  
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/Contact" element={<Contact />} />
+        
         <Route path="/FAQ" element={<FAQ />} />
       </Routes>
     </BrowserRouter>

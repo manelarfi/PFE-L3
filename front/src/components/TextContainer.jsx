@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 
 const TextInputContainer = () => {
-  const [userText, setUserText] = useState('');
+const [userText, setUserText] = useState('');
 
   const handleChange = (e) => {
     setUserText(e.target.value);
   };
   
-  const handleSubmit = () => {
-    alert(`You typed: ${userText}`);
-    // You can also send userText to a backend or use it anywhere
-    
-  };
+  //const handleSubmit = () => {
+    //alert(`You typed: ${userText}`);
+    // Here userText is the text entered by the user
+    //  send userText to the backend 
+//  };
 
   return (
     <div style={{ padding: '20px', maxWidth: '400px' }}>
@@ -22,12 +22,7 @@ const TextInputContainer = () => {
        
       />
 
-      <button className='submit-button'
-        onClick={handleSubmit}
-       
-      >
-        Submit
-      </button>
+      <button className='submit-button'> Submit </button>
 
     </div>
   );
