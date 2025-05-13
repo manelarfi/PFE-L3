@@ -243,7 +243,7 @@ box-shadow: 1px 1px 1px rgba(9, 37, 17, 0.4);
   width: 710px;
   height: 513.385px;
 
-  border-color: #f2f2f33b;
+  border-color: #0000003b;
   border-width: 2px; /* Add border width /
   border-style: solid; / Add border style */
   border-radius: 10px;
@@ -443,11 +443,37 @@ box-shadow: 1px 1px 1px rgba(9, 37, 17, 0.4);
 .chooser{
   position: absolute;
   top: 500px;
-  left: 300px;
-  font-size: 24px;
-  font-family: 'Kanit', sans-serif;
-  font-weight: 100;
-  margin-bottom: 20px;
-  color: #e6f4e9;
-  cursor: pointer;
-}
+  left: 450px;
+
+    margin: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    max-width: 300px;
+  }
+  
+  .chooser label {
+    font-size: 16px;
+   
+    color: #080606;
+    margin-bottom: 10px;
+    display: block;
+  }
+  
+  .chooser select {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    background-color: #11aa25;
+    cursor: pointer;
+  }
+  
+
+  .chooser select:focus {
+    outline: none;
+    border-color: #43ff64d9;
+    box-shadow: 0 0 5px rgba(67, 255, 100, 0.5);
+  }

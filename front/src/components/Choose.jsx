@@ -22,7 +22,7 @@ function Chooser() {
 
   return (
     <div className="chooser">
-      <label htmlFor="selector">Choose an option: </label>
+      <label htmlFor="selector">Choose your method: </label>
       <select id="selector" onChange={handleChange}>
         <option value="">-- Select --</option>
         <option value="LSB">LSB</option>
