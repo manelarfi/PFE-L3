@@ -8,13 +8,13 @@ function Chooser() {
     setSelectedOption(value);
 
     // Execute code based on selection
-    if (value === 'option1') {
+    if (value === 'LSB') {
       console.log("You chose Option 1");
       // Do something for option 1
-    } else if (value === 'option2') {
+    } else if (value === 'DCT') {
       console.log("You chose Option 2");
       // Do something for option 2
-    } else if (value === 'option3') {
+    } else if (value === 'DWT') {
       console.log("You chose Option 3");
       // Do something for option 3
     }
@@ -25,9 +25,9 @@ function Chooser() {
       <label htmlFor="selector">Choose an option: </label>
       <select id="selector" onChange={handleChange}>
         <option value="">-- Select --</option>
-        <option value="option1">Option 1</option>
-        <option value="option2">Option 2</option>
-        <option value="option3">Option 3</option>
+        <option value="LSB">LSB</option>
+        <option value="DCT">DCT</option>
+        <option value="DWT">DWT</option>
       </select>
     </div>
   );
