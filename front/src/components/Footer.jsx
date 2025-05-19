@@ -1,7 +1,7 @@
 
 function Footer() {
   return (
-    <footer >
+    <footer className="footer"> 
       
         <p >© {
           new Date().getFullYear()}   Scrycto </p>

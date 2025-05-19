@@ -8,6 +8,7 @@ import HideContainer from "../components/HideContainer.jsx";
 import Bg from '../components/Bg.jsx';
 import Splinescene from '../components/Spline.jsx';
 import Chooser from '../components/Choose.jsx';
+import Chooser1 from '../components/Choose1.jsx';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 
@@ -15,7 +16,7 @@ function Home() {
   return (
     <>
       <Chooser/>
-
+      <Chooser1/>
      <Header />
      <Title/>
      <Splinescene/>

@@ -26,7 +26,7 @@ const navigate = useNavigate();
          <ul>
 
            <li> <button onClick={handleHome}>Home</button></li>
-           <li> <button onClick={handleContact}>Contact</button></li>
+          
            <li> <button onClick={handleFAQ}>FAQ</button></li>
           
          </ul>

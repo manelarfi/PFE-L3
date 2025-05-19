@@ -12,7 +12,7 @@ function Title() {
       <div className="subtitle">
          <h3>We provide a secure and private way to send messages. </h3> 
       </div>
-          <button className="landin" onClick={() => alert("Button Clicked!")}>Let's get started </button>
+          <button className="landin" >Let's get started </button>
 </div>
       </>
   

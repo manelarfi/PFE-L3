@@ -6,6 +6,7 @@ import FAQ from './pages/FAQ';
 import './index.css';
 import CustomCursor from './components/CustomCursor';
 
+
 function App() {
   return (
     <>
@@ -17,7 +18,7 @@ function App() {
         <Route path="/FAQ" element={<FAQ />} />
       </Routes>
     </BrowserRouter>
-    
+   
     <CustomCursor/></>
   );
 }

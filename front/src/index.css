@@ -205,7 +205,7 @@ box-shadow: 1px 1px 1px rgba(9, 37, 17, 0.4);
 .image-up1 {
 
   position: absolute;
-  top: 1480px;
+  top: 1530px;
   left: 380px;
 
   border: dashed 3px #f2f2f3;
@@ -256,7 +256,7 @@ box-shadow: 1px 1px 1px rgba(9, 37, 17, 0.4);
   z-index: -1;
 
   position: absolute;
-  top: 1380px;
+  top: 1430px;
   left: 240px;
   width: 710px;
   height: 313.385px;
@@ -269,8 +269,8 @@ box-shadow: 1px 1px 1px rgba(9, 37, 17, 0.4);
 }
 .container-title {
 
-  padding-top: 40px;
-  padding-left: 230px;
+  padding-top: 35px;
+  padding-left: 225px;
   font-size: 24px;
   font-family: 'Kanit', sans-serif;
   font-weight: 100;
@@ -363,7 +363,7 @@ box-shadow: 1px 1px 1px rgba(9, 37, 17, 0.4);
 .hide{
   position: absolute;
   top: 600px;
-  left: 450px;
+  left: 250px;
  font-weight: 700;
  font-size: 40px;
   font-family: 'Kanit', sans-serif;
@@ -374,10 +374,10 @@ box-shadow: 1px 1px 1px rgba(9, 37, 17, 0.4);
 }
 .show{
   position: absolute;
-  top: 1300px;
-  left: 450px;
- font-weight: 700;
- font-size: 40px;
+  top: 1350px;
+  left: 250px;
+  font-weight: 700;
+  font-size: 40px;
   font-family: 'Kanit', sans-serif;
 
   margin-bottom: 20px;
@@ -443,33 +443,39 @@ box-shadow: 1px 1px 1px rgba(9, 37, 17, 0.4);
 }
 .chooser{
   position: absolute;
-  top: 500px;
-  left: 450px;
+  top: 610px;
+  left: 590px;
 
-    margin: 20px;
-    padding: 10px;
+   
     border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    max-width: 300px;
+   redius: 10px;
+    background-color: #0b3012;
+  display: flex;
+  align-items: center;
+  gap: 10px; 
   }
   
   .chooser label {
     font-size: 16px;
-   
-    color: #080606;
-    margin-bottom: 10px;
-    display: block;
+ margin-bottom: 0; /* remove bottom margin */
+  margin-right: 10px;
+  margin-left: 10px; /* optional: extra space */
+  display: block;
+  white-space: nowrap; 
+    color: #f7f5f3;
+    redius: 10px;
   }
   
   .chooser select {
     width: 100%;
     padding: 8px;
     font-size: 14px;
-    border: 1px solid #cccccc;
+    border: 1px solid #9ef3af;
     border-radius: 4px;
-    background-color: #11aa25;
+    background-color: #061e09;
     cursor: pointer;
+     redius: 10px;
+     margin-right: 5px; /* optional: extra space */
   }
   
 
@@ -477,4 +483,52 @@ box-shadow: 1px 1px 1px rgba(9, 37, 17, 0.4);
     outline: none;
     border-color: #43ff64d9;
     box-shadow: 0 0 5px rgba(67, 255, 100, 0.5);
+    
+ redius: 10px; 
+  }
+
+.chooser1{
+  position: absolute;
+  top: 1360px;
+  left: 590px;
+
+   
+    border: 1px solid #ccc;
+   redius: 10px;
+    background-color: #0b3012;
+  display: flex;
+  align-items: center;
+  gap: 10px; 
+  }
+  
+  .chooser1 label {
+    font-size: 16px;
+ margin-bottom: 0; /* remove bottom margin */
+  margin-right: 10px;
+  margin-left: 10px; /* optional: extra space */
+  display: block;
+  white-space: nowrap; 
+    color: #f7f5f3;
+    redius: 10px;
+  }
+  
+  .chooser1 select {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #9ef3af;
+    border-radius: 4px;
+    background-color: #061e09;
+    cursor: pointer;
+     redius: 10px;
+     margin-right: 5px; /* optional: extra space */
+  }
+  
+
+  .chooser1 select:focus {
+    outline: none;
+    border-color: #43ff64d9;
+    box-shadow: 0 0 5px rgba(67, 255, 100, 0.5);
+    
+ redius: 10px; 
   }
