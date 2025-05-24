@@ -1,52 +1,68 @@
 # src/controllers/dwt_steganography_controller.py
-from flask import jsonify, request
-from src.services.dwt_steganography_service import DWTSteganographyService
+
 import os
+import uuid
+import cv2
+import numpy as np
+from flask import jsonify, request, send_from_directory
+from src.services.dwt_steganography_service import DWTSteganographyService
 
-# Get the project root directory (where your Flask app resides)
+# Paths
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TEMP_DIR = os.path.join(PROJECT_ROOT, 'tmp')
-
-# Ensure the temp directory exists
+TEMP_DIR     = os.path.join(PROJECT_ROOT, 'tmp')
 os.makedirs(TEMP_DIR, exist_ok=True)
 
+
+def _bits_to_message(bits: list[int]) -> str:
+    """Pack bits back into bytes and decode UTF-8, stopping at null."""
+    n = (len(bits) // 8) * 8
+    arr = np.packbits(np.array(bits[:n], dtype=np.uint8))
+    text = arr.tobytes().decode('utf-8', errors='ignore')
+    return text.split('\0', 1)[0]  # drop after null terminator
+
+
 def dwt_encode_image():
+    # Validate inputs
     if 'image' not in request.files:
         return jsonify({'error': 'No image uploaded'}), 400
     if 'message' not in request.form:
         return jsonify({'error': 'No message provided'}), 400
 
     image_file = request.files['image']
-    message = request.form['message']
-    
+    message    = request.form['message']
+
+    # Call service
     try:
-        encoded_image = DWTSteganographyService.encode(
-            image_file=image_file,
-            message=message,
-            temp_dir=TEMP_DIR
-        )
-        return jsonify({
-            'encoded_image': encoded_image,
-            'algorithm': 'DWT',
-            'temp_dir': TEMP_DIR  # Optional: for debugging
-        }), 200
+        # service.encode reads image_file.read() internally and saves to temp_dir
+        out_path = DWTSteganographyService.encode(image_file, message, TEMP_DIR)
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({'error': str(e)}), 500
+
+    stego_name = os.path.basename(out_path)
+    return jsonify({
+        'stego_image': stego_name,
+        'temp_dir'   : os.path.basename(TEMP_DIR)
+    }), 200
+
 
 def dwt_decode_image():
+    # Validate input
     if 'image' not in request.files:
         return jsonify({'error': 'No image uploaded'}), 400
 
     image_file = request.files['image']
-    
+
+    # Call service
     try:
-        decoded_message = DWTSteganographyService.decode(
-            image_file=image_file,
-            temp_dir=TEMP_DIR
-        )
-        return jsonify({
-            'decoded_message': decoded_message,
-            'algorithm': 'DWT'
-        }), 200
+        decoded = DWTSteganographyService.decode(image_file)
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({'error': str(e)}), 500
+
+    return jsonify({
+        'decoded_message': decoded
+    }), 200
+
+
+def serve_tmp_file(filename):
+    """Serve files saved under tmp/ (e.g. the stego images)."""
+    return send_from_directory(TEMP_DIR, filename)

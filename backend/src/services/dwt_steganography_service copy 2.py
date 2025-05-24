@@ -25,19 +25,14 @@ class DWTSteganographyService:
     @staticmethod
     def build_safe_mask(LL_f, LH_f, HL_f, HH_f, Y_orig, Δ=1):
         H2, W2 = LL_f.shape
-        print(Y_orig)
-        print('\n')
         masks = {
             'LL': np.zeros_like(LL_f, bool),
             'LH': np.zeros_like(LH_f, bool),
             'HL': np.zeros_like(HL_f, bool),
             'HH': np.zeros_like(HH_f, bool),
         }
-        print(masks)
-        print('\n')
 
         for name, subband in masks.items():
-
             mask = masks[name]
             signs = {
                 'LL': ( 1,  1,  1,  1),
@@ -51,7 +46,6 @@ class DWTSteganographyService:
                     y10 = Y_orig[2*p+1, 2*q  ]
                     y01 = Y_orig[2*p  , 2*q+1]
                     y11 = Y_orig[2*p+1, 2*q+1]
-
                     delta = Δ/2.0
                     y00n = y00 + signs[0]*delta
                     y10n = y10 + signs[1]*delta
@@ -113,7 +107,6 @@ class DWTSteganographyService:
         # prepare bitstream
         bits = DWTSteganographyService.text_to_bits(message)
         bit_idx = 0
-        print("bits", bits)
 
         def embed_band(band, mask):
             nonlocal bit_idx
@@ -127,13 +120,13 @@ class DWTSteganographyService:
             return flat.reshape(band.shape)
 
         # embed
-        HH_i = embed_band(HH_i, safe_HH)
+        LL_i = embed_band(LL_i, safe_LL)
+        if bit_idx < len(bits):
+            LH_i = embed_band(LH_i, safe_LH)
         if bit_idx < len(bits):
             HL_i = embed_band(HL_i, safe_HL)
         if bit_idx < len(bits):
-            LH_i = embed_band(LH_i, safe_LH)
-        # if bit_idx < len(bits):
-        #     LL_i = embed_band(LL_i, safe_LL)
+            HH_i = embed_band(HH_i, safe_HH)
         if bit_idx < len(bits):
             raise ValueError("Message too long to embed losslessly")
 
@@ -169,9 +162,9 @@ class DWTSteganographyService:
             for i in np.argwhere(mask.flatten()):
                 bits.append(str(int(band.flatten()[i[0]]) & 1))
 
-        extract_band(HH_i, safe_HH)
-        extract_band(HL_i, safe_HL)
+        extract_band(LL_i, safe_LL)
         extract_band(LH_i, safe_LH)
-        # extract_band(LL_i, safe_LL)
+        extract_band(HL_i, safe_HL)
+        extract_band(HH_i, safe_HH)
 
         return DWTSteganographyService.bits_to_text(''.join(bits))
