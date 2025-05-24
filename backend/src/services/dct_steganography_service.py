@@ -123,14 +123,14 @@ class DCTSteganographyService:
         return "[ERREUR] Message non trouvé"
 
 
-if __name__ == "__main__":
-    # Exemple d'encodage
-    DCTSteganographyService.encode_dct_jpeg_like(
-        image_path='image.jpg',
-        message='Hi jazzyyyyyyyyy!',
-        output_path='image_stego.jpg'
-    )
+# if __name__ == "__main__":
+#     # Exemple d'encodage
+#     DCTSteganographyService.encode_dct_jpeg_like(
+#         image_path='image.jpg',
+#         message='Hi jazzyyyyyyyyy!',
+#         output_path='image_stego.jpg'
+#     )
 
-    # Exemple de décodage
-    message = DCTSteganographyService.decode_dct_jpeg_like('image_stego.jpg')
-    print("[INFO] Message décodé :", message)
+#     # Exemple de décodage
+#     message = DCTSteganographyService.decode_dct_jpeg_like('image_stego.jpg')
+#     print("[INFO] Message décodé :", message)
