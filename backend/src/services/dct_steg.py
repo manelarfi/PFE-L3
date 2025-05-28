@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from PIL import Image
+from io import BytesIO
 
 
 Q50 = np.array([
@@ -41,7 +42,7 @@ class DCTSteganographyService:
 
 
     @staticmethod
-    def encode_dct_jpeg_like(image_path, message, output_path):
+    def encode_dct_jpeg_like(image_path, message, output_path=None):
         img = cv2.imread(image_path)
         if img is None:
             raise ValueError("Image introuvable")
@@ -87,9 +88,19 @@ class DCTSteganographyService:
         Y = np.uint8(Y)
         stego_ycrcb = cv2.merge((Y, Cr, Cb))
         stego_bgr = cv2.cvtColor(stego_ycrcb, cv2.COLOR_YCrCb2BGR)
-        cv2.imwrite(output_path, stego_bgr)
-        print(f"[INFO] Encodage terminé. {idx} bits encodés dans : {output_path}")
+        # Convertir l'image OpenCV (BGR) en PIL (RGB)
+        image_rgb = cv2.cvtColor(stego_bgr, cv2.COLOR_BGR2RGB)
+        pil_image = Image.fromarray(image_rgb)
 
+        # Sauvegarde en mémoire (au lieu d'un fichier)
+        buffer = BytesIO()
+        pil_image.save(buffer, format='JPEG')
+        buffer.seek(0)
+
+        print(f"[INFO] Encodage terminé. {idx} bits encodés.")
+
+        return buffer 
+        
 
 
             
@@ -121,16 +132,23 @@ class DCTSteganographyService:
                         return joined.replace("#####", "")
         
         return "[ERREUR] Message non trouvé"
+    
+
 
 
 if __name__ == "__main__":
-    # Exemple d'encodage
-    DCTSteganographyService.encode_dct_jpeg_like(
-        image_path='image.jpg',
-        message='Hi jazzyyyyyyyyy!',
-        output_path='image_stego.jpg'
-    )
+    from io import BytesIO
+    from PIL import Image
 
-    # Exemple de décodage
-    message = DCTSteganographyService.decode_dct_jpeg_like('image_stego.jpg')
-    print("[INFO] Message décodé :", message)
+    # Appel de la fonction encode, qui retourne un buffer (fichier image en mémoire)
+    buffer = DCTSteganographyService.encode_dct_jpeg_like("tulip.jpg", "hello")
+
+    # Charger l'image à partir du buffer
+    image = Image.open(buffer)
+
+    # Afficher l'image
+    image.show()  # Ouvre l’image avec la visionneuse par défaut
+
+    # Ou sauvegarder manuellement pour inspection
+    image.save("output_test.jpg")
+
