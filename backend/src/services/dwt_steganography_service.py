@@ -25,16 +25,13 @@ class DWTSteganographyService:
     @staticmethod
     def build_safe_mask(LL_f, LH_f, HL_f, HH_f, Y_orig, Δ=1):
         H2, W2 = LL_f.shape
-        print(Y_orig)
-        print('\n')
+
         masks = {
             'LL': np.zeros_like(LL_f, bool),
             'LH': np.zeros_like(LH_f, bool),
             'HL': np.zeros_like(HL_f, bool),
             'HH': np.zeros_like(HH_f, bool),
         }
-        print(masks)
-        print('\n')
 
         for name, subband in masks.items():
 
@@ -79,6 +76,53 @@ class DWTSteganographyService:
     def transform_IDWT(LL_i, LH_i, HL_i, HH_i, Cb, Cr):
         Y = pywt.idwt2((LL_i, (LH_i, HL_i, HH_i)), 'haar')
         Y = np.clip(Y, 0, 255).astype(np.uint8)
+
+        print(f"Shape of Y: {Y.shape}, dtype: {Y.dtype}")
+        # It's good practice to check if Cb or Cr are None before accessing .shape or .dtype
+        if Cb is not None:
+            print(f"Shape of Cb: {Cb.shape}, dtype: {Cb.dtype}")
+        else:
+            print("Cb is None!")
+            # Handle this case, maybe raise an error or return
+        if Cr is not None:
+            print(f"Shape of Cr: {Cr.shape}, dtype: {Cr.dtype}")
+        else:
+            print("Cr is None!")
+            # Handle this case
+
+        # --- FIXES START HERE ---
+
+        # 1. Ensure Cb and Cr have the same dimensions as Y
+        target_height, target_width = Y.shape[:2]
+
+        if Cb is not None and Cb.shape[:2] != (target_height, target_width):
+            print(f"Resizing Cb from {Cb.shape[:2]} to ({target_height}, {target_width})")
+            Cb = cv2.resize(Cb, (target_width, target_height), interpolation=cv2.INTER_LINEAR) # Or INTER_CUBIC
+
+        if Cr is not None and Cr.shape[:2] != (target_height, target_width):
+            print(f"Resizing Cr from {Cr.shape[:2]} to ({target_height}, {target_width})")
+            Cr = cv2.resize(Cr, (target_width, target_height), interpolation=cv2.INTER_LINEAR) # Or INTER_CUBIC
+
+        # 2. Ensure Cb and Cr have the same data type as Y (np.uint8)
+        if Cb is not None and Cb.dtype != Y.dtype:
+            print(f"Converting Cb dtype from {Cb.dtype} to {Y.dtype}")
+            Cb = Cb.astype(Y.dtype)
+
+        if Cr is not None and Cr.dtype != Y.dtype:
+            print(f"Converting Cr dtype from {Cr.dtype} to {Y.dtype}")
+            Cr = Cr.astype(Y.dtype)
+
+        # --- FIXES END HERE ---
+
+        # Defensive check after corrections
+        if Cb is None or Cr is None:
+            raise ValueError("Cb or Cr channel is None after processing attempts.")
+        if not (Y.shape == Cb.shape == Cr.shape):
+             raise ValueError(f"Dimension mismatch after attempting correction: Y:{Y.shape}, Cb:{Cb.shape}, Cr:{Cr.shape}")
+        if not (Y.dtype == Cb.dtype == Cr.dtype):
+             raise ValueError(f"Dtype mismatch after attempting correction: Y:{Y.dtype}, Cb:{Cb.dtype}, Cr:{Cr.dtype}")
+
+
         ycrcb = cv2.merge((Y, Cb, Cr))
         return cv2.cvtColor(ycrcb, cv2.COLOR_YCrCb2BGR)
 
@@ -113,7 +157,6 @@ class DWTSteganographyService:
         # prepare bitstream
         bits = DWTSteganographyService.text_to_bits(message)
         bit_idx = 0
-        print("bits", bits)
 
         def embed_band(band, mask):
             nonlocal bit_idx
