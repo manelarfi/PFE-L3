@@ -175,8 +175,6 @@ class DWTSteganographyService:
             HL_i = embed_band(HL_i, safe_HL)
         if bit_idx < len(bits):
             LH_i = embed_band(LH_i, safe_LH)
-        # if bit_idx < len(bits):
-        #     LL_i = embed_band(LL_i, safe_LL)
         if bit_idx < len(bits):
             raise ValueError("Message too long to embed losslessly")
 
@@ -215,6 +213,5 @@ class DWTSteganographyService:
         extract_band(HH_i, safe_HH)
         extract_band(HL_i, safe_HL)
         extract_band(LH_i, safe_LH)
-        # extract_band(LL_i, safe_LL)
 
         return DWTSteganographyService.bits_to_text(''.join(bits))
