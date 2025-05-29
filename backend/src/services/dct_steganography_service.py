@@ -37,23 +37,23 @@ class DCTSteganographyService:
 
 
 
-   
-
 
     @staticmethod
-    def encode_dct_jpeg_like(image_path, message, output_path):
-        img = cv2.imread(image_path)
+    def encode_dct_jpeg_like(image_file, message) -> bytes:
+        # Read image from file object
+        data = np.frombuffer(image_file.read(), np.uint8)
+        img = cv2.imdecode(data, cv2.IMREAD_COLOR)
         if img is None:
-            raise ValueError("Image introuvable")
+            raise ValueError("Invalid image upload")
 
         ycrcb = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
         Y, Cr, Cb = cv2.split(ycrcb)
         Y = np.float32(Y)
-        print("[DEBUG] Conversion du canal Y en float32 effectuée.")
+        #print("[DEBUG] Y channel converted to float32.")
         message += "#####"
         bits = ''.join(format(ord(c), '08b') for c in message)
-        print(f"[DEBUG] Message à encoder : {message}")
-        print(f"[DEBUG] Bits à encoder ({len(bits)} bits) : {bits}")
+        #print(f"[DEBUG] Message to encode: {message}")
+        #print(f"[DEBUG] Bits to encode ({len(bits)} bits): {bits}")
 
         idx = 0
 
@@ -72,11 +72,6 @@ class DCTSteganographyService:
                 quantized[3, 3] = coeff
                 idx += 1
 
-
-                #print(f"[DEBUG] Bloc ({i},{j}) | Ancien coeff: {old_coeff:.2f} | Nouveau coeff: {coeff:.2f} | Bit encodé: {bit_to_embed}")
-                #print(f"[DEBUG] Coefficient DCT[3,3] APRES MODIF : {dct[3,3]}")
-
-
                 dequantized = quantized * Q50
                 idct_block = cv2.idct(dequantized)
                 Y[i:i+8, j:j+8] = np.clip(idct_block, 0, 255)
@@ -87,19 +82,23 @@ class DCTSteganographyService:
         Y = np.uint8(Y)
         stego_ycrcb = cv2.merge((Y, Cr, Cb))
         stego_bgr = cv2.cvtColor(stego_ycrcb, cv2.COLOR_YCrCb2BGR)
-        cv2.imwrite(output_path, stego_bgr)
-        print(f"[INFO] Encodage terminé. {idx} bits encodés dans : {output_path}")
+        
+        # Convert to bytes
+        success, buffer = cv2.imencode('.png', stego_bgr)
+        if not success:
+            raise IOError("Failed to encode image")
+        #print(f"[INFO] Encoding complete. {idx} bits encoded.")
+        return buffer.tobytes()
 
-
-
-            
 
 
     @staticmethod
-    def decode_dct_jpeg_like(image_path):
-        img = cv2.imread(image_path)
+    def decode_dct_jpeg_like(image_file):
+        # Read image from file object
+        data = np.frombuffer(image_file.read(), np.uint8)
+        img = cv2.imdecode(data, cv2.IMREAD_COLOR)
         if img is None:
-            raise ValueError("Image introuvable")
+            raise ValueError("Invalid image upload")
 
         ycrcb = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
         Y = np.float32(ycrcb[:, :, 0])
@@ -114,7 +113,6 @@ class DCTSteganographyService:
                 bits += str(coeff & 1)
                  
                 if len(bits) % 8 == 0:
-                    
                     chars = [chr(int(bits[i:i+8], 2)) for i in range(0, len(bits), 8)]
                     joined = ''.join(chars)
                     if "#####" in joined:

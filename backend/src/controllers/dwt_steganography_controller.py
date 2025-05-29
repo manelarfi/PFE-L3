@@ -4,8 +4,9 @@ import os
 import uuid
 import cv2
 import numpy as np
-from flask import jsonify, request, send_from_directory
+from flask import jsonify, request, send_file, make_response
 from src.services.dwt_steganography_service import DWTSteganographyService
+from io import BytesIO
 
 # Paths
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -29,20 +30,23 @@ def dwt_encode_image():
         return jsonify({'error': 'No message provided'}), 400
 
     image_file = request.files['image']
-    message    = request.form['message']
+    message = request.form['message']
 
     # Call service
     try:
-        # service.encode reads image_file.read() internally and saves to temp_dir
-        out_path = DWTSteganographyService.encode(image_file, message, TEMP_DIR)
+        # Get image bytes from service
+        image_bytes = DWTSteganographyService.encode(image_file, message, None)
+        
+        # Create response with image data
+        response = make_response(image_bytes)
+        response.headers.set('Content-Type', 'image/png')
+        response.headers.set(
+            'Content-Disposition', 'attachment', filename='stego_image.png'
+        )
+        return response
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-    stego_name = os.path.basename(out_path)
-    return jsonify({
-        'stego_image': stego_name,
-        'temp_dir'   : os.path.basename(TEMP_DIR)
-    }), 200
 
 
 def dwt_decode_image():
@@ -59,7 +63,7 @@ def dwt_decode_image():
         return jsonify({'error': str(e)}), 500
 
     return jsonify({
-        'decoded_message': decoded
+        'text': decoded
     }), 200
 
 

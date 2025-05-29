@@ -127,7 +127,7 @@ class DWTSteganographyService:
         return cv2.cvtColor(ycrcb, cv2.COLOR_YCrCb2BGR)
 
     @staticmethod
-    def encode(image_file, message: str, temp_dir: str) -> str:
+    def encode(image_file, message: str, temp_dir: str) -> bytes:
         data = np.frombuffer(image_file.read(), np.uint8)
         image = cv2.imdecode(data, cv2.IMREAD_COLOR)
         if image is None:
@@ -178,13 +178,14 @@ class DWTSteganographyService:
         if bit_idx < len(bits):
             raise ValueError("Message too long to embed losslessly")
 
-        # reconstruct & save
+        # reconstruct
         stego = DWTSteganographyService.transform_IDWT(LL_i, LH_i, HL_i, HH_i, Cbf, Crf)
-        os.makedirs(temp_dir, exist_ok=True)
-        out_path = os.path.join(temp_dir, "stego_image.png")
-        if not cv2.imwrite(out_path, stego):
-            raise IOError("Failed to write stego image")
-        return out_path
+        
+        # Convert to bytes
+        success, buffer = cv2.imencode('.png', stego)
+        if not success:
+            raise IOError("Failed to encode image")
+        return buffer.tobytes()
 
     @staticmethod
     def decode(image_file) -> str:

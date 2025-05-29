@@ -14,54 +14,55 @@ os.makedirs(app.config['TEMP_DIR'], exist_ok=True)
 class LSBSteganographyService:
     
     @staticmethod
-    def calculate_required_lsb_count(message_length, image_size):
-        """Calculate how many LSBs are needed per channel to store the message"""
-        total_message_bits = message_length * 8  # 8 bits per character
-        available_pixels = image_size // 3  # Total pixels (each has 3 channels)
-        
-        # Calculate required LSBs per channel
-        for lsb_count in range(1, 5):  # Try 1 to 4 LSBs
-            total_capacity = available_pixels * 3 * lsb_count  # Total bits we can store
-            if total_capacity >= total_message_bits:
-                return lsb_count
-        return None  # If even 4 LSBs aren't enough
-    
-    @staticmethod
-    def encode(image_file, message, temp_dir):
-        """Encodes a message into an image using dynamic LSB count"""
-        try:
-            # Save uploaded file to project temp dir
-            upload_path = os.path.join(temp_dir, "uploaded_" + image_file.filename)
-            image_file.save(upload_path)
+    def calculate_capacity(image_shape, lsb_count=1):
+        """Calculate the maximum message length that can be embedded"""
+        height, width, channels = image_shape
+        total_pixels = height * width
+        total_bits = total_pixels * channels * lsb_count
+        # Remove 24 bits (3 bytes) for storing metadata in last pixel
+        total_bits -= 24
+        # Each character needs 8 bits, and we need 5 bytes for delimiter
+        return (total_bits // 8) - 5  # 5 bytes for '#####' delimiter
 
-            # Read image
-            img = cv2.imread(upload_path)
+    @staticmethod
+    def encode(image_file, message: str) -> bytes:
+        """Encodes a message into an image using dynamic LSB count and returns image bytes"""
+        try:
+            # Read image from file object
+            data = np.frombuffer(image_file.read(), np.uint8)
+            img = cv2.imdecode(data, cv2.IMREAD_COLOR)
             if img is None:
                 raise ValueError("Invalid image file")
 
-            # Prepare message
-            message += '#####'  # Delimiter
+            # Add delimiter to message
+            message += '#####'
             message_length = len(message)
             
-            # Calculate required LSB count
-            lsb_count = LSBSteganographyService.calculate_required_lsb_count(message_length, img.size)
+            # Try different LSB counts to find minimum required
+            lsb_count = None
+            for bits in range(1, 5):  # Try 1 to 4 LSBs
+                capacity = LSBSteganographyService.calculate_capacity(img.shape, bits)
+                if message_length <= capacity:
+                    lsb_count = bits
+                    break
+            
             if lsb_count is None:
-                raise ValueError("Message too large for image (exceeds 4-LSB capacity)")
+                raise ValueError(f"Message too large for image (length: {message_length}, max capacity with 4 LSBs: {LSBSteganographyService.calculate_capacity(img.shape, 4)} characters)")
 
             # Convert message to binary
             binary_msg = ''.join(format(ord(c), '08b') for c in message)
             total_bits = len(binary_msg)
 
             # Create LSB mask and clear mask based on LSB count
-            lsb_mask = (1 << lsb_count) - 1  # Creates a mask of required 1s
-            clear_mask = ~lsb_mask & 0xFF    # Creates a mask to clear the LSBs
+            lsb_mask = (1 << lsb_count) - 1
+            clear_mask = ~lsb_mask & 0xFF
 
             # Embed message
             flat_img = img.reshape(-1)
             data_idx = 0
             bits_per_pixel = lsb_count
             
-            for i in range(0, len(flat_img), 1):
+            for i in range(0, len(flat_img) - 3):  # Leave last pixel for metadata
                 if data_idx >= total_bits:
                     break
                     
@@ -79,38 +80,31 @@ class LSBSteganographyService:
                 
                 data_idx += bits_per_pixel
 
-            # Embed LSB count in the last pixel's channels
-            img.reshape(-1)[-3:] = [lsb_count, 0, 0]  # Store LSB count in last pixel
+            # Store LSB count in last pixel
+            flat_img[-3:] = [lsb_count, 0, 0]
 
-            # Save encoded image
-            encoded_path = os.path.join(temp_dir, "encoded_" + os.path.basename(upload_path))
-            cv2.imwrite(encoded_path, img)
+            # Convert to bytes
+            success, buffer = cv2.imencode('.png', img)
+            if not success:
+                raise IOError("Failed to encode image")
             
-            # Cleanup
-            os.unlink(upload_path)
-            
-            return encoded_path
+            return buffer.tobytes()
             
         except Exception as e:
-            if os.path.exists(upload_path):
-                os.unlink(upload_path)
             raise e
 
     @staticmethod
-    def decode(image_file, temp_dir):
+    def decode(image_file) -> str:
         """Decodes a message from an image using stored LSB count"""
         try:
-            # Save uploaded file
-            upload_path = os.path.join(temp_dir, "uploaded_" + image_file.filename)
-            image_file.save(upload_path)
-
-            # Read image
-            img = cv2.imread(upload_path)
+            # Read image from file object
+            data = np.frombuffer(image_file.read(), np.uint8)
+            img = cv2.imdecode(data, cv2.IMREAD_COLOR)
             if img is None:
                 raise ValueError("Invalid image file")
 
             # Get LSB count from last pixel
-            lsb_count = img.reshape(-1)[-3]  # Get LSB count from last pixel
+            lsb_count = img.reshape(-1)[-3]
             if not 1 <= lsb_count <= 4:
                 raise ValueError("Invalid LSB count detected")
 
@@ -138,16 +132,11 @@ class LSBSteganographyService:
                     decoded_text = ''.join(binary_msg)
                     if '#####' in decoded_text:
                         decoded_text = decoded_text.split('#####')[0]
-                        break
+                        return decoded_text
 
-            # Cleanup
-            os.unlink(upload_path)
-            
-            return decoded_text
+            raise ValueError("No valid message found (missing delimiter)")
             
         except Exception as e:
-            if os.path.exists(upload_path):
-                os.unlink(upload_path)
             raise e
 
 # Auto-cleanup on server shutdown
@@ -170,12 +159,11 @@ def handle_encode():
         return jsonify({"error": "No image uploaded"}), 400
         
     try:
-        encoded_path = LSBSteganographyService.encode(
+        encoded_bytes = LSBSteganographyService.encode(
             image_file=request.files['image'],
-            message=request.form.get('message', ''),
-            temp_dir=app.config['TEMP_DIR']
+            message=request.form.get('message', '')
         )
-        return jsonify({"encoded_image": encoded_path})
+        return jsonify({"encoded_image": encoded_bytes})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -186,8 +174,7 @@ def handle_decode():
         
     try:
         message = LSBSteganographyService.decode(
-            image_file=request.files['image'],
-            temp_dir=app.config['TEMP_DIR']
+            image_file=request.files['image']
         )
         return jsonify({"decoded_message": message})
     except Exception as e:

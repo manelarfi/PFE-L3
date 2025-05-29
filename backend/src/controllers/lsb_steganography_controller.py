@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import jsonify, request, make_response
 from src.services.lsb_steganography_service import LSBSteganographyService
 import os
 
@@ -8,37 +8,41 @@ def get_temp_dir():
     os.makedirs(TEMP_DIR, exist_ok=True)
     return TEMP_DIR
 
-def encode_image():  # Changed from lsb_encode_image
+def encode_image():
+    # Validate inputs
     if 'image' not in request.files:
         return jsonify({'error': 'No image uploaded'}), 400
     if 'message' not in request.form:
         return jsonify({'error': 'No message provided'}), 400
 
     try:
-        encoded_image = LSBSteganographyService.encode(
+        # Get image bytes from service
+        image_bytes = LSBSteganographyService.encode(
             image_file=request.files['image'],
-            message=request.form['message'],
-            temp_dir=get_temp_dir()
+            message=request.form['message']
         )
-        return jsonify({
-            'encoded_image': encoded_image,
-            'algorithm': 'LSB'
-        }), 200
+        
+        # Create response with image data
+        response = make_response(image_bytes)
+        response.headers.set('Content-Type', 'image/png')
+        response.headers.set(
+            'Content-Disposition', 'attachment', filename='stego_image.png'
+        )
+        return response
+
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-def decode_image():  # Changed from lsb_decode_image
+def decode_image():
     if 'image' not in request.files:
         return jsonify({'error': 'No image uploaded'}), 400
 
     try:
         decoded_message = LSBSteganographyService.decode(
-            image_file=request.files['image'],
-            temp_dir=get_temp_dir()
+            image_file=request.files['image']
         )
         return jsonify({
-            'decoded_message': decoded_message,
-            'algorithm': 'LSB'
+            'text': decoded_message
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400
