@@ -23,6 +23,39 @@ class DWTSteganographyService:
         return message
 
     @staticmethod
+    def save_analysis_data(masks, operation, positions=None):
+        """Save masks and embedding/extraction positions to files for analysis"""
+        # Create analysis directory if it doesn't exist
+        analysis_dir = os.path.join(os.getcwd(), 'analysis')
+        if not os.path.exists(analysis_dir):
+            os.makedirs(analysis_dir)
+
+        # Save masks
+        for name, mask in masks.items():
+            # Save safe mask matrix
+            mask_filename = os.path.join(analysis_dir, f'mask_{operation}_{name}.txt')
+            np.savetxt(mask_filename, mask.astype(int), fmt='%d')
+            
+            # Calculate and print statistics
+            total = mask.size
+            safe = np.sum(mask)
+            print(f"{operation} - {name} mask statistics:")
+            print(f"Total positions: {total}")
+            print(f"Safe positions: {safe}")
+            print(f"Safety ratio: {(safe/total)*100:.2f}%")
+            print(f"Saved to: {mask_filename}")
+            
+            # Save embedding/extraction positions if available
+            if positions is not None and name in positions:
+                pos_filename = os.path.join(analysis_dir, f'{operation}_positions_{name}.txt')
+                np.savetxt(pos_filename, positions[name].astype(int), fmt='%d')
+                used = np.sum(positions[name])
+                print(f"{operation} positions for {name}:")
+                print(f"Used positions: {used}")
+                print(f"Usage ratio: {(used/total)*100:.2f}%")
+                print(f"Saved to: {pos_filename}")
+
+    @staticmethod
     def build_safe_mask(LL_f, LH_f, HL_f, HH_f, Y_orig, Δ=1):
         H2, W2 = LL_f.shape
 
@@ -34,7 +67,6 @@ class DWTSteganographyService:
         }
 
         for name, subband in masks.items():
-
             mask = masks[name]
             signs = {
                 'LL': ( 1,  1,  1,  1),
@@ -54,77 +86,131 @@ class DWTSteganographyService:
                     y10n = y10 + signs[1]*delta
                     y01n = y01 + signs[2]*delta
                     y11n = y11 + signs[3]*delta
+                    
                     if all(0 <= y < 256 for y in (y00n, y10n, y01n, y11n)):
                         mask[p, q] = True
 
+        # Save the safe masks for analysis
+        DWTSteganographyService.save_analysis_data(masks, 'safe_mask')
         return masks['LL'], masks['LH'], masks['HL'], masks['HH']
 
     @staticmethod
     def transform_DWT_float(Y: np.ndarray):
-        return pywt.dwt2(Y, 'haar')  # returns LL_f, (LH_f, HL_f, HH_f)
+        # Normalize input values to reduce filter impact
+        Y_norm = Y / 255.0
+        
+        # First level DWT
+        coeffs1 = pywt.dwt2(Y_norm, 'haar')
+        LL1 = coeffs1[0]
+        LH1, HL1, HH1 = coeffs1[1]
+        
+        # Second level DWT
+        coeffs2 = pywt.dwt2(LL1, 'haar')
+        LL2 = coeffs2[0]
+        LH2, HL2, HH2 = coeffs2[1]
+        
+        # Third level DWT
+        coeffs3 = pywt.dwt2(LL2, 'haar')
+        LL3 = coeffs3[0]
+        LH3, HL3, HH3 = coeffs3[1]
+        
+        # Denormalize all coefficients
+        return {
+            'level1': {
+                'LL': LL1 * 255.0,
+                'LH': LH1 * 255.0,
+                'HL': HL1 * 255.0,
+                'HH': HH1 * 255.0
+            },
+            'level2': {
+                'LL': LL2 * 255.0,
+                'LH': LH2 * 255.0,
+                'HL': HL2 * 255.0,
+                'HH': HH2 * 255.0
+            },
+            'level3': {
+                'LL': LL3 * 255.0,
+                'LH': LH3 * 255.0,
+                'HL': HL3 * 255.0,
+                'HH': HH3 * 255.0
+            }
+        }
 
     @staticmethod
-    def transform_DWT_int(LL_f, LH_f, HL_f, HH_f):
-        return (
-            np.round(LL_f).astype(np.int32),
-            np.round(LH_f).astype(np.int32),
-            np.round(HL_f).astype(np.int32),
-            np.round(HH_f).astype(np.int32),
-        )
+    def transform_DWT_int(subbands):
+        # Quantization factor to reduce rounding errors
+        Q = 1.0
+        
+        result = {}
+        for level in ['level1', 'level2', 'level3']:
+            result[level] = {
+                'LL': np.round(subbands[level]['LL'] / Q).astype(np.int32) * Q,
+                'LH': np.round(subbands[level]['LH'] / Q).astype(np.int32) * Q,
+                'HL': np.round(subbands[level]['HL'] / Q).astype(np.int32) * Q,
+                'HH': np.round(subbands[level]['HH'] / Q).astype(np.int32) * Q
+            }
+        return result
 
     @staticmethod
-    def transform_IDWT(LL_i, LH_i, HL_i, HH_i, Cb, Cr):
-        Y = pywt.idwt2((LL_i, (LH_i, HL_i, HH_i)), 'haar')
-        Y = np.clip(Y, 0, 255).astype(np.uint8)
+    def transform_IDWT(subbands, Cb, Cr):
+        # Normalize coefficients before inverse transform
+        # Start with level 3 (innermost)
+        for level in ['level3', 'level2', 'level1']:
+            LL_norm = subbands[level]['LL'] / 255.0
+            LH_norm = subbands[level]['LH'] / 255.0
+            HL_norm = subbands[level]['HL'] / 255.0
+            HH_norm = subbands[level]['HH'] / 255.0
+            
+            # Perform inverse DWT for this level
+            Y = pywt.idwt2((LL_norm, (LH_norm, HL_norm, HH_norm)), 'haar')
+            
+            # If not the last level, update the LL component of the next level
+            if level != 'level1':
+                next_level = f"level{int(level[-1])-1}"
+                subbands[next_level]['LL'] = Y * 255.0
+        
+        # Final Y is the result of the last inverse transform
+        Y = np.clip(Y * 255.0, 0, 255).astype(np.uint8)
 
-        print(f"Shape of Y: {Y.shape}, dtype: {Y.dtype}")
-        # It's good practice to check if Cb or Cr are None before accessing .shape or .dtype
-        if Cb is not None:
-            print(f"Shape of Cb: {Cb.shape}, dtype: {Cb.dtype}")
-        else:
-            print("Cb is None!")
-            # Handle this case, maybe raise an error or return
-        if Cr is not None:
-            print(f"Shape of Cr: {Cr.shape}, dtype: {Cr.dtype}")
-        else:
-            print("Cr is None!")
-            # Handle this case
-
-        # --- FIXES START HERE ---
-
-        # 1. Ensure Cb and Cr have the same dimensions as Y
+        # Ensure dimensions match
         target_height, target_width = Y.shape[:2]
 
         if Cb is not None and Cb.shape[:2] != (target_height, target_width):
-            print(f"Resizing Cb from {Cb.shape[:2]} to ({target_height}, {target_width})")
-            Cb = cv2.resize(Cb, (target_width, target_height), interpolation=cv2.INTER_LINEAR) # Or INTER_CUBIC
+            Cb = cv2.resize(Cb, (target_width, target_height), interpolation=cv2.INTER_LINEAR)
 
         if Cr is not None and Cr.shape[:2] != (target_height, target_width):
-            print(f"Resizing Cr from {Cr.shape[:2]} to ({target_height}, {target_width})")
-            Cr = cv2.resize(Cr, (target_width, target_height), interpolation=cv2.INTER_LINEAR) # Or INTER_CUBIC
+            Cr = cv2.resize(Cr, (target_width, target_height), interpolation=cv2.INTER_LINEAR)
 
-        # 2. Ensure Cb and Cr have the same data type as Y (np.uint8)
-        if Cb is not None and Cb.dtype != Y.dtype:
-            print(f"Converting Cb dtype from {Cb.dtype} to {Y.dtype}")
-            Cb = Cb.astype(Y.dtype)
+        # Ensure correct data type
+        if Cb is not None:
+            Cb = Cb.astype(np.uint8)
+        if Cr is not None:
+            Cr = Cr.astype(np.uint8)
 
-        if Cr is not None and Cr.dtype != Y.dtype:
-            print(f"Converting Cr dtype from {Cr.dtype} to {Y.dtype}")
-            Cr = Cr.astype(Y.dtype)
-
-        # --- FIXES END HERE ---
-
-        # Defensive check after corrections
+        # Defensive checks
         if Cb is None or Cr is None:
             raise ValueError("Cb or Cr channel is None after processing attempts.")
         if not (Y.shape == Cb.shape == Cr.shape):
-             raise ValueError(f"Dimension mismatch after attempting correction: Y:{Y.shape}, Cb:{Cb.shape}, Cr:{Cr.shape}")
+            raise ValueError(f"Dimension mismatch after attempting correction: Y:{Y.shape}, Cb:{Cb.shape}, Cr:{Cr.shape}")
         if not (Y.dtype == Cb.dtype == Cr.dtype):
-             raise ValueError(f"Dtype mismatch after attempting correction: Y:{Y.dtype}, Cb:{Cb.dtype}, Cr:{Cr.dtype}")
-
+            raise ValueError(f"Dtype mismatch after attempting correction: Y:{Y.dtype}, Cb:{Cb.dtype}, Cr:{Cr.dtype}")
 
         ycrcb = cv2.merge((Y, Cb, Cr))
         return cv2.cvtColor(ycrcb, cv2.COLOR_YCrCb2BGR)
+
+    @staticmethod
+    def save_subband_values(subbands, operation):
+        """Save subband coefficient values to files for analysis"""
+        # Create image directory if it doesn't exist
+        image_dir = os.path.join(os.getcwd(), 'image')
+        if not os.path.exists(image_dir):
+            os.makedirs(image_dir)
+
+        # Save each subband's values
+        for name, values in subbands.items():
+            filename = os.path.join(image_dir, f'{operation}_subband_{name}.txt')
+            np.savetxt(filename, values, fmt='%.6f')  # Use higher precision for float values
+            print(f"Saved {operation} subband {name} values to: {filename}")
 
     @staticmethod
     def encode(image_file, message: str, temp_dir: str) -> bytes:
@@ -141,42 +227,73 @@ class DWTSteganographyService:
         Crf = Crf.astype(np.uint8)
 
         # float DWT
-        LL_f, (LH_f, HL_f, HH_f) = DWTSteganographyService.transform_DWT_float(Yf)
+        subbands = DWTSteganographyService.transform_DWT_float(Yf)
+
+        # Save original subband values
+        DWTSteganographyService.save_subband_values(subbands['level1'], 'original')
+        DWTSteganographyService.save_subband_values(subbands['level2'], 'original')
+        DWTSteganographyService.save_subband_values(subbands['level3'], 'original')
 
         # original Y for safety mask
-        Y_orig = pywt.idwt2((LL_f, (LH_f, HL_f, HH_f)), 'haar')
+        Y_orig = pywt.idwt2((subbands['level1']['LL'], (subbands['level1']['LH'], subbands['level1']['HL'], subbands['level1']['HH'])), 'haar')
 
         # build masks
         safe_LL, safe_LH, safe_HL, safe_HH = DWTSteganographyService.build_safe_mask(
-            LL_f, LH_f, HL_f, HH_f, Y_orig, Δ=1)
+            subbands['level1']['LL'], subbands['level1']['LH'], subbands['level1']['HL'], subbands['level1']['HH'], Y_orig, Δ=1)
 
         # int DWT for embedding
         LL_i, LH_i, HL_i, HH_i = DWTSteganographyService.transform_DWT_int(
-            LL_f, LH_f, HL_f, HH_f)
+            subbands['level1']['LL'], subbands['level1']['LH'], subbands['level1']['HL'], subbands['level1']['HH'])
 
         # prepare bitstream
         bits = DWTSteganographyService.text_to_bits(message)
         bit_idx = 0
 
-        def embed_band(band, mask):
+        # Create embedding position trackers
+        embedding_positions = {
+            'HH': np.zeros_like(safe_HH, dtype=bool),
+            'HL': np.zeros_like(safe_HL, dtype=bool),
+            'LH': np.zeros_like(safe_LH, dtype=bool),
+            'LL': np.zeros_like(safe_LL, dtype=bool)
+        }
+
+        def embed_band(band, mask, band_name):
             nonlocal bit_idx
             flat = band.flatten()
+            flat_positions = embedding_positions[band_name].flatten()
             for i in np.argwhere(mask.flatten()):
                 if bit_idx >= len(bits):
                     break
                 b = int(bits[bit_idx])
                 flat[i[0]] = (flat[i[0]] & ~1) | b
+                flat_positions[i[0]] = True  # Mark this position as used
                 bit_idx += 1
+            embedding_positions[band_name] = flat_positions.reshape(band.shape)
             return flat.reshape(band.shape)
 
         # embed
-        HH_i = embed_band(HH_i, safe_HH)
+        HH_i = embed_band(HH_i, safe_HH, 'HH')
         if bit_idx < len(bits):
-            HL_i = embed_band(HL_i, safe_HL)
+            HL_i = embed_band(HL_i, safe_HL, 'HL')
         if bit_idx < len(bits):
-            LH_i = embed_band(LH_i, safe_LH)
+            LH_i = embed_band(LH_i, safe_LH, 'LH')
         if bit_idx < len(bits):
             raise ValueError("Message too long to embed losslessly")
+
+        # Save modified subband values
+        DWTSteganographyService.save_subband_values({
+            'LL': LL_i,
+            'LH': LH_i,
+            'HL': HL_i,
+            'HH': HH_i
+        }, 'embedded')
+
+        # Save embedding positions for analysis
+        DWTSteganographyService.save_analysis_data(
+            {'HH': safe_HH, 'HL': safe_HL, 'LH': safe_LH, 'LL': safe_LL},
+            'embedding',
+            embedding_positions
+        )
 
         # reconstruct
         stego = DWTSteganographyService.transform_IDWT(LL_i, LH_i, HL_i, HH_i, Cbf, Crf)
@@ -198,21 +315,87 @@ class DWTSteganographyService:
         Yf, Cbf, Crf = cv2.split(ycrcb)
         Yf = Yf.astype(np.float32)
 
-        LL_f, (LH_f, HL_f, HH_f) = DWTSteganographyService.transform_DWT_float(Yf)
-        Y_orig = pywt.idwt2((LL_f, (LH_f, HL_f, HH_f)), 'haar')
+        subbands = DWTSteganographyService.transform_DWT_float(Yf)
+
+        # Save received subband values
+        DWTSteganographyService.save_subband_values(subbands['level1'], 'received')
+        DWTSteganographyService.save_subband_values(subbands['level2'], 'received')
+        DWTSteganographyService.save_subband_values(subbands['level3'], 'received')
+
+        Y_orig = pywt.idwt2((subbands['level1']['LL'], (subbands['level1']['LH'], subbands['level1']['HL'], subbands['level1']['HH'])), 'haar')
+
         safe_LL, safe_LH, safe_HL, safe_HH = DWTSteganographyService.build_safe_mask(
-            LL_f, LH_f, HL_f, HH_f, Y_orig, Δ=1)
+            subbands['level1']['LL'], subbands['level1']['LH'], subbands['level1']['HL'], subbands['level1']['HH'], Y_orig, Δ=1)
 
         LL_i, LH_i, HL_i, HH_i = DWTSteganographyService.transform_DWT_int(
-            LL_f, LH_f, HL_f, HH_f)
+            subbands['level1']['LL'], subbands['level1']['LH'], subbands['level1']['HL'], subbands['level1']['HH'])
 
-        bits = []
-        def extract_band(band, mask):
+        # Save extracted subband values
+        DWTSteganographyService.save_subband_values({
+            'LL': LL_i,
+            'LH': LH_i,
+            'HL': HL_i,
+            'HH': HH_i
+        }, 'extracted')
+
+        # Create extraction position trackers
+        extraction_positions = {
+            'HH': np.zeros_like(safe_HH, dtype=bool),
+            'HL': np.zeros_like(safe_HL, dtype=bool),
+            'LH': np.zeros_like(safe_LH, dtype=bool),
+            'LL': np.zeros_like(safe_LL, dtype=bool)
+        }
+
+        current_byte = []  # Store bits of current byte
+        message_bits = []  # Store all extracted bits
+        found_null = False
+
+        def process_byte():
+            nonlocal found_null
+            if len(current_byte) == 8:
+                byte_str = ''.join(current_byte)
+                c = chr(int(byte_str, 2))
+                if c == '\0':
+                    found_null = True
+                    return True
+                message_bits.extend(current_byte)
+                current_byte.clear()
+            return False
+
+        def extract_band(band, mask, band_name):
+            nonlocal current_byte, found_null
+            if found_null:
+                return
+
+            flat = band.flatten()
+            flat_positions = extraction_positions[band_name].flatten()
+            
             for i in np.argwhere(mask.flatten()):
-                bits.append(str(int(band.flatten()[i[0]]) & 1))
+                if found_null:
+                    break
+                    
+                bit = str(int(flat[i[0]]) & 1)
+                current_byte.append(bit)
+                flat_positions[i[0]] = True
+                
+                # Process byte when we have 8 bits
+                if process_byte():
+                    break
+                
+            extraction_positions[band_name] = flat_positions.reshape(band.shape)
 
-        extract_band(HH_i, safe_HH)
-        extract_band(HL_i, safe_HL)
-        extract_band(LH_i, safe_LH)
+        # Extract and track positions
+        extract_band(HH_i, safe_HH, 'HH')
+        if not found_null:
+            extract_band(HL_i, safe_HL, 'HL')
+        if not found_null:
+            extract_band(LH_i, safe_LH, 'LH')
 
-        return DWTSteganographyService.bits_to_text(''.join(bits))
+        # Save extraction positions for analysis
+        DWTSteganographyService.save_analysis_data(
+            {'HH': safe_HH, 'HL': safe_HL, 'LH': safe_LH, 'LL': safe_LL},
+            'extraction',
+            extraction_positions
+        )
+
+        return DWTSteganographyService.bits_to_text(''.join(message_bits))
